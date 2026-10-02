@@ -1,0 +1,34 @@
+name: Tellybox
+slug: tellybox
+description: Parent-approved videos for young kids, cast to the TV within a daily allowance.
+version: "0.1.0"
+url: https://github.com/sandermvanvliet/tellybox
+image: ghcr.io/sandermvanvliet/tellybox
+arch:
+  - amd64
+  - aarch64
+startup: application
+boot: auto
+# Tellybox needs mDNS to find the Chromecast, and the Chromecast fetches video from this host.
+host_network: true
+# Tellybox's own entrypoint is PID 1 (its health check reads /proc/1/cmdline).
+init: false
+map:
+  - type: media
+    read_only: false
+environment:
+  TELLYBOX_OPTIONS_FILE: /data/options.json
+  # Subfolders, so /data/options.json stays root-owned and untouched by Tellybox's chown.
+  TELLYBOX_DATA_DIR: /data/tellybox
+  TELLYBOX_MEDIA_DIR: /media/tellybox
+webui: "http://[HOST]:[PORT:8080]/admin"
+options:
+  web_port: 8080
+  cast_api_port: 8081
+  media_base_url: ""
+  admin_password: ""
+schema:
+  web_port: port
+  cast_api_port: port
+  media_base_url: url?
+  admin_password: password?
