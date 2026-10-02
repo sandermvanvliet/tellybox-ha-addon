@@ -2,13 +2,11 @@ name: Tellybox
 slug: tellybox
 description: Parent-approved videos for young kids, cast to the TV within a daily allowance.
 version: "0.1.0"
-url: https://github.com/sandermvanvliet/tellybox
+url: https://github.com/sandermvanvliet/Tellybox
 image: ghcr.io/sandermvanvliet/tellybox
 arch:
   - amd64
   - aarch64
-startup: application
-boot: auto
 # Tellybox needs mDNS to find the Chromecast, and the Chromecast fetches video from this host.
 host_network: true
 # Tellybox's own entrypoint is PID 1 (its health check reads /proc/1/cmdline).
