@@ -1,0 +1,62 @@
+name: Release
+
+# v* tags (releases): check the tag against tellybox/config.yaml and the changelog, check that the
+# Tellybox image for this version exists, lint, and create the GitHub release with the changelog
+# section as its notes. How to cut a release: docs/RELEASING.md.
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Check the tag matches config.yaml
+        id: version
+        run: |
+          tag_version="${GITHUB_REF_NAME#v}"
+          file_version="$(sed -n 's/^version: *"\{0,1\}\([^"]*\)"\{0,1\} *$/\1/p' tellybox/config.yaml)"
+          if [ "$tag_version" != "$file_version" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match version '$file_version' in tellybox/config.yaml. Bump the version in a PR, merge it, and tag the merge commit (see docs/RELEASING.md)."
+            exit 1
+          fi
+          echo "value=$tag_version" >> "$GITHUB_OUTPUT"
+
+      - name: Extract the changelog section
+        run: |
+          version="${{ steps.version.outputs.value }}"
+          awk -v v="## $version" '$0 == v {found=1; next} /^## / {found=0} found' tellybox/CHANGELOG.md > notes.md
+          if ! grep -q '[^[:space:]]' notes.md; then
+            echo "::error::tellybox/CHANGELOG.md has no '## $version' section with content. Rename 'Unreleased' to '$version' in the release PR (see docs/RELEASING.md)."
+            exit 1
+          fi
+
+      - name: Check the Tellybox image for this version exists
+        run: |
+          image="ghcr.io/sandermvanvliet/tellybox:${{ steps.version.outputs.value }}"
+          if ! docker buildx imagetools inspect "$image" >/dev/null; then
+            echo "::error::$image does not exist. Home Assistant pulls the image tagged with the add-on version, so release Tellybox $VERSION first (see docs/RELEASING.md)."
+            exit 1
+          fi
+        env:
+          VERSION: ${{ steps.version.outputs.value }}
+
+      - name: Run add-on linter
+        uses: frenck/action-app-linter@v2
+        with:
+          path: "./tellybox"
+
+      - name: Create the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 \
+            || gh release create "$GITHUB_REF_NAME" --verify-tag \
+                 --title "Tellybox add-on ${{ steps.version.outputs.value }}" --notes-file notes.md
