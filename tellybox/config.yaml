@@ -29,3 +29,8 @@ schema:
   cast_api_port: port
   media_base_url: url?
   admin_password: password?
+  oidc_issuer: url?
+  oidc_client_id: str?
+  oidc_client_secret: password?
+  oidc_redirect_uri: url?
+  oidc_admin_group: str?
