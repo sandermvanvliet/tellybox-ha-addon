@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.0
+
+- Based on Tellybox 0.4.0: the admin state now includes each profile's picture, whether it may watch in the app and its kid app style, which the Home Assistant integration (ha-tellybox 0.4.0) uses for the new Picture entity and per-kid sensors.
+
 ## 0.3.0
 
 - Based on Tellybox 0.3.0: watching in the app instead of casting (a TV/device toggle and in-app player per profile), channel subscriptions with an approval inbox, and per-profile control over which shows can be seen.
