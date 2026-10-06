@@ -1,7 +1,7 @@
 name: Tellybox
 slug: tellybox
 description: Parent-approved videos for young kids, cast to the TV within a daily allowance.
-version: "0.3.0"
+version: "0.4.0"
 url: https://github.com/sandermvanvliet/Tellybox
 image: ghcr.io/sandermvanvliet/tellybox
 arch:
